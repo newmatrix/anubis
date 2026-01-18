@@ -331,3 +331,83 @@ function stopIbanCheck() {
     btnStop.style.display = 'none';
     btnClear.style.display = 'inline-block';
 }
+
+// ================= IBAN ANALYZER POPUP LOGIC =================
+
+// 1. دوال التحكم في النافذة المنبثقة
+function openIbanAnalyzerModal() {
+    document.getElementById('ibanAnalyzerModal').style.display = "block";
+    document.getElementById('analyzerInput').focus();
+}
+
+function closeIbanAnalyzerModal() {
+    document.getElementById('ibanAnalyzerModal').style.display = "none";
+    document.getElementById('analyzerInput').value = ""; // مسح الحقل عند الإغلاق
+    document.getElementById('analyzerOutput').innerHTML = '<span style="color:#555;">Waiting for input...</span>';
+}
+
+// إغلاق النافذة عند الضغط خارجها
+window.onclick = function(event) {
+    const modal = document.getElementById('ibanAnalyzerModal');
+    if (event.target == modal) {
+        closeIbanAnalyzerModal();
+    }
+    // (يجب دمج هذا مع كود إغلاق الـ BIN Modal إذا كان موجوداً في ملف آخر، أو تركه هنا سيعمل للمودال الحالي)
+}
+
+// 2. منطق التحليل البصري
+const bankCodeLengths = {
+    "DE": 8, "AT": 5, "NL": 4, "CH": 5, "BE": 3, 
+    "FR": 5, "ES": 4, "IT": 5, "GB": 4, "SA": 2, 
+    "EG": 4, "AE": 3, "TR": 5, "KW": 4, "JO": 4
+};
+
+function parseIbanVisual() {
+    const input = document.getElementById('analyzerInput');
+    const output = document.getElementById('analyzerOutput');
+    
+    // تنظيف الإدخال
+    let raw = input.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    
+    if (raw.length < 5) {
+        output.innerHTML = '<span style="color:#555;">Enter valid IBAN...</span>';
+        return;
+    }
+
+    // التقسيم
+    const country = raw.substring(0, 2);
+    const checkDigits = raw.substring(2, 4);
+    let rest = raw.substring(4);
+
+    // تحديد طول البنك
+    let bankLen = bankCodeLengths[country] || 0; 
+
+    let bankCode = "";
+    let account = "";
+
+    if (bankLen > 0 && rest.length >= bankLen) {
+        bankCode = rest.substring(0, bankLen);
+        account = rest.substring(bankLen);
+    } else {
+        // إذا الدولة غير معروفة، نعتبر الباقي حساب
+        account = rest;
+    }
+
+    // بناء HTML
+    let html = `
+        <div class="v-part v-country" title="Country Code">${country}</div>
+        <div class="v-part v-check" title="Check Digits">${checkDigits}</div>
+    `;
+
+    if (bankCode) {
+        html += `<div class="v-part v-bank" title="Bank Code">${bankCode}</div>`;
+    }
+
+    if (account) {
+        // تنسيق رقم الحساب (مسافة كل 4 أرقام)
+        let formattedAcc = account.match(/.{1,4}/g)?.join(' ') || account;
+        html += `<div class="v-part v-acc" title="Account Number">${formattedAcc}</div>`;
+    }
+
+    output.innerHTML = html;
+}
