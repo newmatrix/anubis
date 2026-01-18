@@ -232,7 +232,11 @@
                     </div>
                 </div>
 
-                <button class="btn-gen" onclick="generateIbans()" style="margin-top: 25px;">Generate IBANs ⚡</button>
+				<div style="display: flex; gap: 10px; margin-top: 25px;">
+				<button class="btn-gen" onclick="generateIbans()" style="flex: 2; margin: 0;">Generate IBANs ⚡</button>
+				<button class="btn-lookup-bic" onclick="openIbanAnalyzerModal()" style="flex: 1; margin: 0;">Analyze 🔍</button>
+				</div>
+				
                 <div class="credits">Powered by <span>Hesham Taha</span></div>
             </div>
 
@@ -369,6 +373,38 @@
         </div>
         <div class="modal-footer">
             <button class="btn-clear" onclick="closeIbanInfoModal()">Close ❌</button>
+        </div>
+    </div>
+</div>
+
+<div id="ibanAnalyzerModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>🎨 IBAN Visual Analyzer</h3>
+            <span class="close-modal" onclick="closeIbanAnalyzerModal()">&times;</span>
+        </div>
+        
+        <div style="padding: 20px;">
+            <p style="color:#aaa; font-size:12px; margin-bottom:10px;">Paste any IBAN to see a color-coded breakdown of its structure.</p>
+            
+            <input type="text" id="analyzerInput" placeholder="Paste IBAN here (e.g. DE89...)" 
+                   style="font-family:monospace; letter-spacing:1px; text-transform:uppercase; font-size:16px; text-align:center;" 
+                   oninput="parseIbanVisual()">
+
+            <div id="analyzerOutput" class="visual-box" style="margin-top: 20px; min-height: 60px; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:5px;">
+                <span style="color:#555;">Waiting for input...</span>
+            </div>
+
+            <div class="visual-legend" style="margin-top: 20px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                <div class="v-part v-country">Country</div>
+                <div class="v-part v-check">Check</div>
+                <div class="v-part v-bank">Bank Code</div>
+                <div class="v-part v-acc">Account / BBAN</div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-clear" onclick="closeIbanAnalyzerModal()">Close ❌</button>
         </div>
     </div>
 </div>
