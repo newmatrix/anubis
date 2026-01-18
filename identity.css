@@ -1,5 +1,13 @@
 /* ================= IDENTITY TAB THEME (Flat Yellow) ================= */
 
+/* تخصيص اللون الأساسي لتبويب الهوية فقط ليصبح أصفر */
+#idTab {
+    --primary: #f1c40f; 
+}
+
+#idTab label {
+    color: var(--primary) !important;
+
 /* 1. تنسيق زر التبويب العلوي (Identity Tab) - أصفر + ظل */
 .tab-btn:nth-child(3):hover,
 .tab-btn:nth-child(3).active {
@@ -65,3 +73,4 @@
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
