@@ -360,3 +360,4 @@ function openTab(tabId, btn) {
     document.getElementById(tabId).style.display = 'block';
     btn.classList.add('active');
 }
+
