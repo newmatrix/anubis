@@ -146,3 +146,33 @@ optgroup {
     font-style: normal;
     font-weight: bold;
 }
+
+/* --- IBAN Analyzer Modal Styles --- */
+#analyzerOutput .v-part {
+    font-size: 18px; /* تكبير الخط داخل المودال ليكون واضحاً */
+    padding: 5px 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* تنسيق حقل الإدخال في المودال */
+#analyzerInput {
+    border: 1px solid var(--primary);
+    background: rgba(0,0,0,0.2);
+    color: #fff;
+}
+#analyzerInput:focus {
+    box-shadow: 0 0 10px rgba(155, 89, 182, 0.3) !important;
+}
+
+/* تصغير خط مفتاح الألوان في المودال */
+.visual-legend .v-part {
+    font-size: 14px !important; /* صغر الرقم ده زي ما تحب */
+    padding: 2px 6px;
+    margin: 1px;
+}
