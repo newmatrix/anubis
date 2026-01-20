@@ -32,7 +32,7 @@
                 <h2 style="color:var(--primary); margin:0; font-size: 1.2em;">🛠️ Card Gen</h2>
                 <div style="display:flex; gap:10px; align-items: flex-end;">
                     <div style="flex: 3;"> <label>BIN / Format <span id="binType" style="margin-left:10px; font-size:10px; color:var(--hit-color); font-weight:normal;"></span></label>
-                        <input type="text" id="ccFormat" placeholder="539935" oninput="detectBin()">
+                        <input type="text" id="ccFormat" placeholder="539935" oninput="this.value = this.value.replace(/[^0-9]/g, ''); detectBin()">
                     </div>
                     <div style="flex: 1.3;"> <label>Algo</label>
                         <select id="genAlgo">
@@ -523,3 +523,4 @@
 
 </body>
 </html>
+
