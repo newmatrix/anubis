@@ -387,13 +387,6 @@ function closeBinModal() {
     document.getElementById('modalLoading').innerHTML = "Searching... ⌛";
 }
 
-window.onclick = function(event) {
-    const modal = document.getElementById('binModal');
-    if (event.target == modal) {
-        closeBinModal();
-    }
-}
-
 function saveBinDetails() {
     const bin = document.getElementById('m_bin').innerText;
     if (bin === "---") return;
@@ -425,3 +418,4 @@ function openTab(tabId, btn) {
     document.getElementById(tabId).style.display = 'block';
     btn.classList.add('active');
 }
+
