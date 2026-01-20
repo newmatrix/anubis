@@ -346,15 +346,6 @@ function closeIbanAnalyzerModal() {
     document.getElementById('analyzerOutput').innerHTML = '<span style="color:#555;">Waiting for input...</span>';
 }
 
-// إغلاق النافذة عند الضغط خارجها
-window.onclick = function(event) {
-    const modal = document.getElementById('ibanAnalyzerModal');
-    if (event.target == modal) {
-        closeIbanAnalyzerModal();
-    }
-    // (يجب دمج هذا مع كود إغلاق الـ BIN Modal إذا كان موجوداً في ملف آخر، أو تركه هنا سيعمل للمودال الحالي)
-}
-
 // 2. منطق التحليل البصري
 const bankCodeLengths = {
     "DE": 8, "AT": 5, "NL": 4, "CH": 5, "BE": 3, 
@@ -411,3 +402,4 @@ function parseIbanVisual() {
 
     output.innerHTML = html;
 }
+
