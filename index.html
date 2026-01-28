@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ANUBIS TOOLS v1.0</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☠️</text></svg>">
+    
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="identity.css">
     <link rel="stylesheet" href="iban.css">
     <link rel="stylesheet" href="ip_tools.css">
+    
+    <link rel="stylesheet" href="subdomain.css">
 </head>
 
 <body>
@@ -24,6 +27,7 @@
         <button class="tab-btn" onclick="openTab('ibanTab', this)">🏦 IBAN Tools</button>
         <button class="tab-btn" onclick="openTab('idTab', this)">👤 Fake Identity</button>
         <button class="tab-btn" onclick="openTab('ipTab', this); initIpTab()">🌐 IP Scanner</button>
+        <button class="tab-btn" onclick="openTab('subTab', this)">🔍 Subdomains</button>
     </div>
 
     <div id="cardTab" class="tab-content" style="display: block;">
@@ -301,7 +305,7 @@
             <div class="ip-panel ip-control-panel">
                 <h3 class="panel-title">👨‍💻 My Digital Identity</h3>
                 
-<div class="my-info-container">
+                <div class="my-info-container">
                     <div class="my-ip-main" id="my_ip" style="margin-bottom: 5px;">Loading...</div>
                     
                     <div class="dns-leak-row" style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 10px;">
@@ -408,6 +412,37 @@
         
     </div>
 
+    <div id="subTab" class="tab-content" style="display: none;">
+        <div class="panel">
+            <h2 style="margin:0; font-size: 1.2em;">🔍 Subdomain Enumeration</h2>
+            <p style="color:#777; font-size:11px; margin-bottom:15px;">Powered by Certificate Transparency Logs (crt.sh)</p>
+            
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="subInput" placeholder="example.com">
+                <button id="btnSubScan" class="btn-gen" style="width: 150px; margin:0;" onclick="scanSubdomains()">SCAN 🚀</button>
+            </div>
+
+            <div class="res-card" style="height: auto; min-height: 400px; margin-top: 20px; border:none; background:transparent; box-shadow:none; padding:0;">
+                <div class="res-header" style="color: var(--primary); background: rgba(0,0,0,0.3); border-radius: 8px 8px 0 0;">
+                    FOUND SUBDOMAINS
+                    <div style="display:flex; align-items:center;">
+                        <button class="header-action-btn btn-mini-save" style="display:inline-block; background:#444;" onclick="copySubdomains()">Copy List 📋</button>
+                        
+						<span id="subCount" class="count-badge" style="margin-left:5px;">0</span>
+                    </div>
+                </div>
+                <div id="subResultList" class="sub-list-container" style="margin-top:0; border-radius: 0 0 8px 8px; border-top:none;">
+                    <div style="text-align:center; padding:50px; color:#555;">
+                        <div style="font-size:40px; opacity:0.5;">🌐</div>
+                        Ready to scan target...
+                    </div>
+                </div>
+            </div>
+            
+            <div class="credits">Powered by <span>Hesham Taha</span></div>
+        </div>
+    </div>
+
 </div>
 
 <div id="binModal" class="modal">
@@ -441,51 +476,28 @@
         </div>
         
         <div style="padding: 20px; font-size: 13px; line-height: 1.6; color: #ccc;">
-            
-            <p style="margin-bottom: 15px; text-align: center; color: #aaa;">
-                Example of a calculated German IBAN:
-            </p>
-
+            <p style="margin-bottom: 15px; text-align: center; color: #aaa;">Example of a calculated German IBAN:</p>
             <div style="background: rgba(0,0,0,0.3); padding: 15px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; text-align: center; font-family: 'Courier New', monospace; font-size: 22px; font-weight: bold; letter-spacing: 1px; margin-bottom: 20px;">
                 <span style="color: #9b59b6;">DE</span><span style="color: #f1c40f;">89</span><span style="color: #00ff88;">37040044</span><span style="color: #ddd;">0532013000</span>
             </div>
-
             <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
-                
                 <div style="display: flex; align-items: center; margin-bottom: 10px;">
                     <div style="width: 40px; text-align: center; font-weight: bold; color: #9b59b6; background: rgba(155, 89, 182, 0.1); padding: 2px 5px; border-radius: 4px; margin-right: 10px;">DE</div>
-                    <div>
-                        <b style="color: #fff;">Country Code</b>
-                        <div style="font-size: 11px; color: #888;">Identifies the country (Germany).</div>
-                    </div>
+                    <div><b style="color: #fff;">Country Code</b><div style="font-size: 11px; color: #888;">Identifies the country (Germany).</div></div>
                 </div>
-
                 <div style="display: flex; align-items: center; margin-bottom: 10px;">
                     <div style="width: 40px; text-align: center; font-weight: bold; color: #f1c40f; background: rgba(241, 196, 15, 0.1); padding: 2px 5px; border-radius: 4px; margin-right: 10px;">89</div>
-                    <div>
-                        <b style="color: #fff;">Check Digits (Calculated)</b>
-                        <div style="font-size: 11px; color: #888;">We calculate this to make the IBAN valid.</div>
-                    </div>
+                    <div><b style="color: #fff;">Check Digits (Calculated)</b><div style="font-size: 11px; color: #888;">We calculate this to make the IBAN valid.</div></div>
                 </div>
-
                 <div style="display: flex; align-items: center; margin-bottom: 10px;">
                     <div style="width: 40px; text-align: center; font-weight: bold; color: #00ff88; background: rgba(0, 255, 136, 0.1); padding: 2px 5px; border-radius: 4px; margin-right: 10px;">370..</div>
-                    <div>
-                        <b style="color: #fff;">Bank Code (BLZ)</b>
-                        <div style="font-size: 11px; color: #888;">The specific bank ID you entered.</div>
-                    </div>
+                    <div><b style="color: #fff;">Bank Code (BLZ)</b><div style="font-size: 11px; color: #888;">The specific bank ID you entered.</div></div>
                 </div>
-
                 <div style="display: flex; align-items: center;">
                     <div style="width: 40px; text-align: center; font-weight: bold; color: #ddd; background: rgba(255, 255, 255, 0.1); padding: 2px 5px; border-radius: 4px; margin-right: 10px;">053..</div>
-                    <div>
-                        <b style="color: #fff;">Account Number</b>
-                        <div style="font-size: 11px; color: #888;">Generated randomly by the tool.</div>
-                    </div>
+                    <div><b style="color: #fff;">Account Number</b><div style="font-size: 11px; color: #888;">Generated randomly by the tool.</div></div>
                 </div>
-
             </div>
-
         </div>
         <div class="modal-footer">
             <button class="btn-clear" onclick="closeIbanInfoModal()">Close ❌</button>
@@ -499,18 +511,12 @@
             <h3>🎨 IBAN Visual Analyzer</h3>
             <span class="close-modal" onclick="closeIbanAnalyzerModal()">&times;</span>
         </div>
-        
         <div style="padding: 20px;">
             <p style="color:#aaa; font-size:12px; margin-bottom:10px;">Paste any IBAN to see a color-coded breakdown of its structure.</p>
-            
-            <input type="text" id="analyzerInput" placeholder="Paste IBAN here (e.g. DE89...)" 
-                   style="font-family:monospace; letter-spacing:1px; text-transform:uppercase; font-size:16px; text-align:center;" 
-                   oninput="parseIbanVisual()">
-
+            <input type="text" id="analyzerInput" placeholder="Paste IBAN here (e.g. DE89...)" style="font-family:monospace; letter-spacing:1px; text-transform:uppercase; font-size:16px; text-align:center;" oninput="parseIbanVisual()">
             <div id="analyzerOutput" class="visual-box" style="margin-top: 20px; min-height: 60px; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:5px;">
                 <span style="color:#555;">Waiting for input...</span>
             </div>
-
             <div class="visual-legend" style="margin-top: 20px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
                 <div class="v-part v-country">Country</div>
                 <div class="v-part v-check">Check</div>
@@ -518,7 +524,6 @@
                 <div class="v-part v-acc">Account / BBAN</div>
             </div>
         </div>
-
         <div class="modal-footer">
             <button class="btn-clear" onclick="closeIbanAnalyzerModal()">Close ❌</button>
         </div>
@@ -531,6 +536,7 @@
 <script src="identity.js"></script>
 <script src="iban.js"></script>
 <script src="ip_tools.js"></script>
+<script src="subdomain.js"></script>
 
 </body>
 </html>
