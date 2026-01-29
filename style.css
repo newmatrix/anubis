@@ -1,0 +1,394 @@
+:root {
+    --primary: #ff3366; 
+    --bg: #1a1a1b; 
+    --panel-bg: rgba(45, 45, 46, 0.6); 
+    --text: #e0e0e0; 
+    --border: #444; 
+    --hit-color: #00ff88; 
+    --live-color: #f1c40f; 
+    --dead-color: #ff4d4d;
+    --input-bg: rgba(0,0,0,0.3);
+    color-scheme: dark;
+}
+
+body { 
+    background-color: var(--bg); 
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px; 
+    background-attachment: fixed; 
+    color: var(--text); 
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0; 
+    padding: 20px; 
+    transition: 0.4s; 
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #1a1a1b; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* Top Bar */
+.top-bar { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
+.top-bar h1 { 
+    margin: 0; 
+    font-size: 28px; 
+    color: var(--primary); 
+    text-shadow: none; 
+    text-align: center; 
+    letter-spacing: 1px; 
+}
+
+/* ================= BUTTONS GLOBAL STYLE (Flat & Interactive) ================= */
+button { 
+    cursor: pointer; 
+    border: none; 
+    border-radius: 8px; 
+    font-weight: bold; 
+    transition: background 0.2s, transform 0.1s; 
+    position: relative; 
+    overflow: hidden; 
+    height: 45px; 
+    box-shadow: none !important; 
+}
+
+/* 1. زر الفحص (START) - أخضر مسطح */
+.btn-check { 
+    background: var(--hit-color); 
+    color: #000; 
+    flex: 2; 
+    font-size: 14px; 
+}
+.btn-check:hover {
+    background: #00e676; 
+    transform: none !important; /* منع القفز */
+}
+.btn-check:active {
+    transform: scale(0.95) !important; /* ✅ تفعيل الضغط */
+}
+
+/* 2. زر المسح (CLEAR) - رمادي مسطح */
+.btn-clear { 
+    background: #636e72; 
+    color: white; 
+    flex: 1; 
+    font-size: 13px; 
+}
+.btn-clear:hover {
+    background: #b2bec3;
+    transform: none !important;
+}
+.btn-clear:active {
+    transform: scale(0.95) !important; /* ✅ تفعيل الضغط */
+}
+
+/* 3. زر الإيقاف (STOP) - أحمر مسطح */
+.btn-stop { 
+    background: #d63031; 
+    color: white; 
+    flex: 1; 
+    font-size: 13px; 
+    display: none; 
+}
+.btn-stop:hover {
+    background: #ff7675;
+    transform: none !important;
+}
+.btn-stop:active {
+    transform: scale(0.95) !important; /* ✅ تفعيل الضغط */
+}
+
+/* 4. زر التوليد (Generate) - أحمر أساسي مسطح */
+.btn-gen { 
+    background: var(--primary); 
+    color: white; 
+    margin-top: 10px; 
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.btn-gen:hover {
+    background: #e02e5b; 
+    transform: none !important;
+}
+.btn-gen:active {
+    transform: scale(0.95) !important; /* ✅ تفعيل الضغط */
+}
+
+/* 5. زر البحث (BIN Lookup) - برتقالي مسطح */
+.btn-lookup {
+    background: #e67e22; 
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.btn-lookup:hover { 
+    background: #d35400; 
+    transform: none !important;
+}
+.btn-lookup:active {
+    transform: scale(0.95) !important; /* ✅ تفعيل الضغط */
+}
+
+.controls-row { display: flex; gap: 8px; margin-top: 15px; }
+
+.credits { font-size: 11px; text-align: center; margin-top: 10px; color: #777; font-weight: bold; letter-spacing: 0.5px; }
+.credits span { color: var(--primary); }
+
+.main-container { width: 100%; max-width: 1300px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+.top-section { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+    gap: 20px; 
+    align-items: stretch; 
+}
+
+.panel, .res-card { 
+    background: var(--panel-bg); 
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px);
+    padding: 20px; 
+    border-radius: 15px; 
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); 
+    border: 1px solid rgba(255, 255, 255, 0.08); 
+    display: flex; 
+    flex-direction: column; 
+}
+
+/* Inputs & Selects Style */
+input, select, textarea { 
+    width: 100%; padding: 10px; background: var(--input-bg); 
+    border: 1px solid var(--border); color: #fff; border-radius: 8px; 
+    box-sizing: border-box; outline: none; transition: 0.3s;
+    appearance: none; 
+}
+
+/* إلغاء التوهج عند التركيز */
+input:focus, select:focus, textarea:focus {
+    border-color: var(--primary);
+    box-shadow: none !important; 
+}
+
+select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff3366' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 15px;
+    padding-right: 30px; 
+    cursor: pointer;
+}
+
+select option { background-color: #2d2d2e; color: #fff; }
+
+textarea#checkList { flex-grow: 1; min-height: 130px; margin-top: 10px; resize: none; font-family: 'Courier New', monospace; }
+
+/* Progress Bar */
+.progress-container { width: 100%; background: #111; border-radius: 10px; height: 8px; margin: 15px 0 5px 0; overflow: hidden; display: none; }
+
+/* ================= STYLED PROGRESS BAR (Glow & Pulse) ================= */
+.progress-bar { 
+    height: 100%; 
+    width: 0%; 
+    
+    /* اللون يعتمد على المتغير، سيتغير تلقائياً حسب التبويب */
+    background: var(--primary);
+    
+    /* ظل خفيف بنفس لون التبويب لعمل توهج */
+    box-shadow: 0 0 10px var(--primary);
+    
+    transition: width 0.3s ease; 
+    
+    /* أنيميشن الوميض الهادئ */
+    animation: pulseGlow 2s infinite alternate;
+}
+
+/* حركة الوميض (تنفس) */
+@keyframes pulseGlow {
+    0% { 
+        opacity: 0.7; 
+        box-shadow: 0 0 5px var(--primary); 
+    }
+    100% { 
+        opacity: 1; 
+        box-shadow: 0 0 20px var(--primary); 
+    }
+}
+
+.results-section { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+    gap: 15px; 
+}
+
+.res-card { height: 380px; overflow: hidden; }
+
+.res-header { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); }
+.res-body { padding: 10px; flex-grow: 1; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 11px; }
+
+/* Mini Action Buttons in Header */
+.header-action-btn { 
+    padding: 4px 10px; font-size: 9px; border-radius: 6px; height: auto; 
+    margin-right: 5px; display: none; text-transform: uppercase; 
+    border: 1px solid rgba(255,255,255,0.1); 
+    box-shadow: none !important;
+    transition: background 0.2s, transform 0.1s;
+}
+.header-action-btn:hover { transform: none !important; }
+.header-action-btn:active { transform: scale(0.95) !important; }
+
+.btn-mini-save { background: var(--hit-color); color: #000; }
+.btn-mini-clear { background: #555; color: white; }
+.btn-mini-retry { background: var(--live-color); color: #000; }
+
+#fileName { width: 70px; height: 20px; font-size: 9px; padding: 2px 5px; margin-right: 5px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 4px; display: none; }
+
+.reason-tag { font-size: 9px; padding: 1px 5px; border-radius: 4px; background: rgba(0,0,0,0.3); margin-left: 5px; color: #bbb; border: 1px solid rgba(255,255,255,0.05); }
+
+.hit-item, .res-body div { animation: slideIn 0.4s ease-out forwards; }
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.hit-item { background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 8px; padding: 10px; margin-bottom: 10px; transition: 0.3s; }
+.hit-item:hover { transform: scale(1.02); background: rgba(0, 255, 136, 0.1); }
+.hit-item b { color: var(--hit-color); display: block; margin-bottom: 3px; font-size: 13px; }
+.hit-info { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 10px; color: #aaa; }
+
+.hit-box { border-top: 4px solid var(--hit-color); }
+.live-box { border-top: 4px solid var(--live-color); }
+.dead-box { border-top: 4px solid var(--dead-color); }
+
+label { display: block; margin: 10px 0 5px; font-weight: bold; font-size: 11px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
+.count-badge { background: rgba(0,0,0,0.5); padding: 2px 10px; border-radius: 20px; font-size: 11px; border: 1px solid rgba(255,255,255,0.1); }
+.speed-meter { font-size: 10px; color: #aaa; margin-left: 10px; font-weight: normal; }
+
+@media (max-width: 600px) {
+    body { padding: 10px; }
+    .top-bar h1 { font-size: 22px; }
+    .controls-row { flex-direction: row !important; flex-wrap: nowrap !important; }
+    .btn-check, .btn-stop, .btn-clear { font-size: 11px !important; padding: 0 5px; }
+    .res-card { height: 400px; }
+}
+
+/* --- Modal Styles --- */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0; top: 0; 
+    width: 100%; height: 100%; 
+    background-color: rgba(0,0,0,0.85); 
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-content {
+    background: #1a1a1b;
+    margin: 10% auto; 
+    padding: 0; 
+    border: 1px solid var(--primary);
+    width: 90%; max-width: 400px;
+    border-radius: 15px;
+    box-shadow: none; 
+    overflow: hidden;
+    animation: slideUp 0.3s;
+}
+
+@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-header {
+    background: rgba(255, 51, 102, 0.1);
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; justify-content: space-between; align-items: center;
+}
+.modal-header h3 { margin: 0; color: var(--primary); font-size: 18px; }
+
+.close-modal { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.close-modal:hover { color: #fff; }
+
+.modal-footer { padding: 15px; display: flex; gap: 10px; border-top: 1px solid rgba(255,255,255,0.1); }
+
+.bin-row {
+    display: flex; justify-content: space-between; 
+    padding: 12px 20px; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); 
+    font-size: 14px; color: #ddd;
+}
+.bin-row span:first-child { color: #888; font-weight: bold; }
+.bin-row span:last-child { color: #fff; font-family: 'Courier New', monospace; font-weight: bold; text-align: right; }
+
+/* --- Toast Notification --- */
+#toast {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px; 
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 16px;
+    position: fixed;
+    z-index: 9999;
+    left: 50%;
+    bottom: 30px;
+    font-size: 14px;
+    border: 1px solid var(--primary);
+    box-shadow: none;
+    font-weight: bold;
+}
+
+#toast.show {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+@keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+/* --- TABS NAVIGATION STYLES (Flat & Clean) --- */
+.tabs-nav {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 5px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: 2px solid var(--border);
+    color: #777;
+    padding: 10px 25px;
+    font-size: 14px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+/* إضافة تأثير الضغط */
+.tab-btn:active {
+    transform: scale(0.95); 
+}
+
+/* التبويب الأول (Card System) - أحمر + ظل */
+.tab-btn:nth-child(1):hover,
+.tab-btn:nth-child(1).active {
+    border-color: #ff3366 !important;
+    color: #ff3366 !important;
+    background: rgba(255, 51, 102, 0.1); 
+    /* تصحيح: إضافة الظل الأحمر */
+    box-shadow: 0 5px 20px -5px rgba(255, 51, 102, 0.5) !important;
+}
