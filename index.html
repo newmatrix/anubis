@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANUBIS TOOLS v1.0</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☠️</text></svg>">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="identity.css">
+    <link rel="stylesheet" href="iban.css">
+    <link rel="stylesheet" href="ip_tools.css">
+    
+    <link rel="stylesheet" href="subdomain.css">
+</head>
+
+<body>
+
+<div class="top-bar">
+    <h1>ANUBIS TOOLS 💀</h1>
+</div>
+
+<div class="main-container">
+
+    <div class="tabs-nav">
+        <button class="tab-btn active" onclick="openTab('cardTab', this)">💳 Card System</button>
+        <button class="tab-btn" onclick="openTab('ibanTab', this)">🏦 IBAN Tools</button>
+        <button class="tab-btn" onclick="openTab('idTab', this)">👤 Fake Identity</button>
+        <button class="tab-btn" onclick="openTab('ipTab', this); initIpTab()">🌐 IP Scanner</button>
+        <button class="tab-btn" onclick="openTab('subTab', this)">🔍 Subdomains</button>
+    </div>
+
+    <div id="cardTab" class="tab-content" style="display: block;">
+        <div class="top-section">
+             <div class="panel">
+                <h2 style="color:var(--primary); margin:0; font-size: 1.2em;">🛠️ Card Gen</h2>
+                <div style="display:flex; gap:10px; align-items: flex-end;">
+                    <div style="flex: 3;"> <label>BIN / Format <span id="binType" style="margin-left:10px; font-size:10px; color:var(--hit-color); font-weight:normal;"></span></label>
+                       <input type="text" id="ccFormat" placeholder="539935" oninput="detectBin()">
+                    </div>
+                    <div style="flex: 1.3;"> <label>Algo</label>
+                        <select id="genAlgo">
+                            <option value="luhn">Luhn ✅</option>
+                            <option value="raw">Raw ⚠️</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:5px;">
+                    <div style="flex:1;"><label>Month</label>
+                        <select id="expMonth">
+                            <option value="rnd">Rnd</option>
+                            <option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;"><label>Year</label>
+                        <select id="expYear">
+                            <option value="rnd">Rnd</option>
+                            <option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option><option value="2029">2029</option><option value="2030">2030</option><option value="2031">2031</option><option value="2032">2032</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;"><label>CVV</label>
+                        <input type="text" id="cvvInput" placeholder="Rnd" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    </div>
+                    <div style="flex:1;"><label>Qty</label><input type="number" id="genCount" value="50"></div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn-gen" onclick="generateCards()" style="flex: 2;">Generate 🔥</button>
+                    <button class="btn-lookup" onclick="openBinModal()" style="flex: 1;">BIN Lookup 🔍</button>
+                </div>
+                <div class="credits">Powered by <span>Hesham Taha</span></div>
+            </div>
+
+            <div class="panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
+                    <h2 style="color:var(--primary); margin:0; font-size: 1.2em;">🔍 Stripe Checker</h2>
+                    <div>
+                        <span id="speedCPM" class="speed-meter">Card Peer Minute: 0</span>
+                        <span id="countWait" class="count-badge" style="color:white; border:1px solid var(--border);">WAIT: 0</span>
+                    </div>
+                </div>
+                <textarea id="checkList" placeholder="Cards list..." oninput="updateWaitCount()"></textarea>
+                <div id="progCont" class="progress-container"><div id="progBar" class="progress-bar"></div></div>
+                <div class="controls-row">
+                    <button id="checkBtn" class="btn-check" onclick="startCheck()">START ⚡</button>
+                    <button id="stopBtn" class="btn-stop" onclick="stopCheck()">STOP 🛑</button>
+                    <button id="clearBtn" class="btn-clear" onclick="clearAll()">CLEAR 🧹</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section" style="margin-top: 20px;">
+            <div class="res-card hit-box">
+                <div class="res-header" style="color: var(--hit-color);">HIT
+                    <div style="display:flex; align-items:center;">
+                        <input type="text" id="fileName" placeholder="Name...">
+                        <button id="clearHitBtn" class="header-action-btn btn-mini-clear" onclick="clearHits()">Clear</button>
+                        <button id="dlHitBtn" class="header-action-btn btn-mini-save" onclick="download('hit')">Save</button>
+                        <span id="countHit" class="count-badge">0</span>
+                    </div>
+                </div>
+                <div id="resHit" class="res-body"></div>
+            </div>
+            <div class="res-card live-box">
+                <div class="res-header" style="color: var(--live-color);">UNKNOWN
+                    <div style="display:flex; align-items:center;">
+                        <button id="retryBtn" class="header-action-btn btn-mini-retry" onclick="retryUnknown()">Retry</button>
+                        <span id="countLive" class="count-badge">0</span>
+                    </div>
+                </div>
+                <div id="resLive" class="res-body"></div>
+            </div>
+            <div class="res-card dead-box">
+                <div class="res-header" style="color: var(--dead-color);">DEAD
+                    <span id="countDead" class="count-badge">0</span>
+                </div>
+                <div id="resDead" class="res-body"></div>
+            </div>
+        </div>
+    </div> 
+
+    <div id="idTab" class="tab-content" style="display: none;">
+        <div class="top-section">
+            <div class="panel">
+                <h2 style="color:var(--live-color); margin:0; font-size: 1.2em;">👤 Identity Settings</h2>
+                <div style="margin-top: 15px;">
+                    <label>Country 🌍</label>
+                    <select id="idCountry">
+                        <option value="US">United States (US) 🇺🇸</option>
+                        <option value="GB">United Kingdom (GB) 🇬🇧</option>
+                        <option value="EG">Egypt (EG) 🇪🇬</option>
+                        <option value="SA">Saudi Arabia (SA) 🇸🇦</option>
+                        <option value="DE">Germany (DE) 🇩🇪</option>
+                        <option value="FR">France (FR) 🇫🇷</option>
+                        <option value="CA">Canada (CA) 🇨🇦</option>
+                        <option value="AU">Australia (AU) 🇦🇺</option>
+                        <option value="IT">Italy (IT) 🇮🇹</option>
+                        <option value="ES">Spain (ES) 🇪🇸</option>
+                        <option value="BR">Brazil (BR) 🇧🇷</option>
+                        <option value="TR">Turkey (TR) 🇹🇷</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <div style="flex:1;">
+                        <label>Gender ⚧</label>
+                        <select id="idGender">
+                            <option value="random">Random 🎲</option>
+                            <option value="male">Male 👨</option>
+                            <option value="female">Female 👩</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label>Age Range 🎂</label>
+                        <select id="idAge">
+                            <option value="random">Random</option>
+                            <option value="18-25">18 - 25</option>
+                            <option value="26-35">26 - 35</option>
+                            <option value="36-50">36 - 50</option>
+                            <option value="50+">50+</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-gen" style="background: var(--live-color); color: #000; margin-top: 25px;" onclick="generateIdentity()">Generate Identity ⚡</button>
+                <div class="credits">Powered by <span>Hesham Taha</span></div>
+            </div>
+
+            <div class="panel">
+                <h2 style="color:var(--live-color); margin:0; font-size: 1.2em;">📜 Result Data</h2>
+                
+                <div id="idResultBox" style="margin-top:15px; display:none;">
+                    <div class="id-row"><span>Full Name</span> <span id="res_name" style="color:var(--hit-color);">---</span></div>
+                    <div class="id-row"><span>Birth Date</span> <span id="res_dob">---</span></div>
+                    <div class="id-row"><span>Phone</span> <span id="res_phone" style="color:var(--primary);">---</span></div>
+                    <div class="id-row"><span>Address</span> <span id="res_address" style="font-size:12px;">---</span></div>
+                    <div class="id-row"><span>Zip Code</span> <span id="res_zip">---</span></div>
+                    <div class="id-row"><span>City</span> <span id="res_city">---</span></div>
+                </div>
+
+                <div id="idEmptyState" style="text-align: center; margin-top: 50px; color: #555;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">🕵️</div>
+                    Ready to generate...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ibanTab" class="tab-content" style="display: none;">
+        <div class="top-section">
+            
+            <div class="panel">
+                <h2 style="color:var(--live-color); margin:0; font-size: 1.2em;">⚙️ IBAN Generator</h2>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <div style="flex: 2;">
+                        <label>Mode / Country 🌍</label>
+                        <select id="ibanCountryGen" onchange="toggleIbanMode()">
+                            <optgroup label="Top Used (Direct Debit) 🔥">
+                                <option value="DE">Germany (DE) 🇩🇪</option>
+                                <option value="NL">Netherlands (NL) 🇳🇱</option>
+                                <option value="AT">Austria (AT) 🇦🇹</option> <option value="BE">Belgium (BE) 🇧🇪</option> <option value="FR">France (FR) 🇫🇷</option>
+                                <option value="ES">Spain (ES) 🇪🇸</option>
+                            </optgroup>
+                            <optgroup label="Other Countries">
+                                <option value="GB">United Kingdom (GB) 🇬🇧</option>
+                                <option value="IT">Italy (IT) 🇮🇹</option>
+                                <option value="SA">Saudi Arabia (SA) 🇸🇦</option>
+                                <option value="EG">Egypt (EG) 🇪🇬</option>
+                                <option value="AE">UAE (AE) 🇦🇪</option>
+                            </optgroup>
+                            <optgroup label="Advanced Tools">
+                                <option value="CALC">🧮 IBAN Calculator (Custom Bank)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Amount 🔢</label>
+                        <input type="number" id="ibanAmountGen" value="50" min="1" placeholder="Qty">
+                    </div>
+                </div>
+
+                <div id="modeCalc" class="calc-section disabled-section">
+                    <div class="calc-header">
+                        <span class="help-link" onclick="openIbanInfoModal()">How is IBAN Calculator? ℹ️</span>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <div style="flex:1;">
+                            <label>Target Country</label>
+                            <select id="calcTargetCountry">
+                                <option value="DE">Germany (DE) 🇩🇪</option>
+                                <option value="NL">Netherlands (NL) 🇳🇱</option>
+                                <option value="AT">Austria (AT) 🇦🇹</option> <option value="BE">Belgium (BE) 🇧🇪</option> <option value="FR">France (FR) 🇫🇷</option>
+                                <option value="ES">Spain (ES) 🇪🇸</option>
+                            </select>
+                        </div>
+                        <div style="flex:1.5;">
+                            <label>Bank Code (BLZ)</label>
+                            <input type="text" id="calcBankCode" placeholder="Ex: 61450050">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="btn-gen" onclick="generateIbans()" style="flex: 2; margin: 0;">Generate IBANs ⚡</button>
+                <button class="btn-lookup-bic" onclick="openIbanAnalyzerModal()" style="flex: 1; margin: 0;">Analyze 🔍</button>
+                </div>
+                
+                <div class="credits">Powered by <span>Hesham Taha</span></div>
+            </div>
+
+          <div class="panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
+                    <h2 style="color:var(--primary); margin:0; font-size: 1.2em;">🔍 IBAN Validator</h2>
+                    <div>
+                        <span id="ibanSpeedMeter" class="speed-meter" style="margin-right: 5px;">iBan Peer Minute: 0</span>
+                        <span id="ibanCountBadge" class="count-badge" style="color:white; border:1px solid var(--border);">COUNT: 0</span>
+                    </div>
+                </div>
+                
+                <textarea id="ibanList" placeholder="Generated IBANs will appear here..." style="margin-top:10px; height: 190px; resize: none; transition: height 0.3s ease;" oninput="updateIbanCount()"></textarea>
+                
+                <div id="ibanProgCont" class="progress-container" style="display:none; margin-top: 15px;">
+                    <div id="ibanProgBar" class="progress-bar"></div>
+                </div>
+
+                <div style="margin-top: 8px; margin-bottom: 5px; font-size: 10px; color: #666; text-align: center; font-weight: 500;">
+                    ℹ️ Processing based on <b style="color:var(--primary);">ISO 7064 Mod 97-10</b> algorithm. 
+                    <span style="opacity: 0.7;">Results are mathematically valid, but 100% active status is not guaranteed.</span>
+                </div>
+
+                <div class="controls-row">
+                    <button id="btnIbanCheck" class="btn-check" onclick="startIbanCheck()">CHECK ⚡</button>
+                    <button id="btnIbanStop" class="btn-stop" onclick="stopIbanCheck()" style="display:none;">STOP 🛑</button>
+                    <button id="btnIbanClear" class="btn-clear" onclick="clearIbanList()">CLEAR 🧹</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section" style="margin-top: 20px;">
+            <div class="res-card hit-box" style="height: 290px;">
+                <div class="res-header" style="color: var(--hit-color);">
+                    VALID ✅
+                    <div style="display:flex; align-items:center;">
+                        <input type="text" id="ibanFileName" placeholder="Name..." style="width: 70px; height: 20px; font-size: 9px; padding: 2px 5px; margin-right: 5px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 4px; display: none; color:white;">
+                        <button id="clearIbanHitsBtn" class="header-action-btn btn-mini-clear" style="display:none;" onclick="clearIbanHits()">Clear</button>
+                        <button id="saveIbanHitsBtn" class="header-action-btn btn-mini-save" style="display:none;" onclick="saveIbanHits()">Save</button>
+                        <span id="ibanHitCount" class="count-badge" style="margin-left: 5px;">0</span>
+                    </div>
+                </div>
+                <div id="resIbanValid" class="res-body"></div>
+            </div>
+
+            <div class="res-card dead-box" style="height: 290px;">
+                <div class="res-header" style="color: var(--dead-color);">
+                    INVALID ❌
+                    <span id="ibanDeadCount" class="count-badge">0</span>
+                </div>
+                <div id="resIbanInvalid" class="res-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ipTab" class="tab-content" style="display: none;">
+        
+        <div class="ip-split-view">
+            
+            <div class="ip-panel ip-control-panel">
+                <h3 class="panel-title">👨‍💻 My Digital Identity</h3>
+                
+                <div class="my-info-container">
+                    <div class="my-ip-main" id="my_ip" style="margin-bottom: 5px;">Loading...</div>
+                    
+                    <div class="dns-leak-row" style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 10px;">
+                        <div style="display:flex; align-items:center;">
+                            <span style="color:var(--primary); font-weight:bold; margin-right:5px;">DNS Leak:</span> 
+                            <span id="dns_ip" style="font-family:monospace; color:#ccc;">Checking...</span>
+                        </div>
+                        <div style="display:flex; align-items:center;">
+                            <span id="dns_country" style="color:#fff; font-weight:bold; margin-right: 5px;">---</span>
+                            <span id="dns_status_icon" style="font-size: 14px;">⏳</span>
+                        </div>
+                    </div>
+                    
+                    <div class="my-geo-row">
+                        <span id="my_flag" class="flag-icon">🏳️</span>
+                        <div class="geo-text">
+                            <span id="my_country">---</span>
+                            <span class="sep">•</span>
+                            <span id="my_region">---</span>
+                        </div>
+                    </div>
+
+                    <div class="my-detail-row">
+                        <span class="lbl">ORG:</span> <span id="my_org">---</span>
+                    </div>
+
+                    <div class="divider-line" style="margin: 10px 0;"></div>
+
+                    <div class="my-time-box">
+                        <div class="time-lbl">TIME ZONE</div>
+                        <div class="time-val">
+                            <span id="my_tz_id">---</span>
+                            <span class="utc-badge" id="my_tz_utc">UTC</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="search-area">
+                    <label>🔎 Lookup IP Address</label>
+                    <input type="text" id="targetIpInput" placeholder="Enter IP (e.g. 1.1.1.1)">
+                    <button id="btnIpSearch" class="btn-search" onclick="lookupTargetIp()">SCAN TARGET 🚀</button>
+                    <div class="credits" style="margin-top: 15px;">Powered by <span>Hesham Taha</span></div>
+                </div>
+            </div>
+
+            <div class="ip-panel ip-result-panel">
+                <h3 class="panel-title">📊 Scan Results</h3>
+                
+                <div id="scanResultContent" style="display:none;">
+                    
+                    <div class="res-row main-row">
+                        <div class="res-group">
+                            <span class="lbl">IP ADDRESS</span>
+                            <span class="val highlight" id="res_ip">---</span>
+                        </div>
+                        <div class="res-group right">
+                            <span class="lbl">TYPE</span>
+                            <span class="val type-badge" id="res_type">---</span>
+                        </div>
+                    </div>
+
+                    <div class="res-row">
+                        <span class="lbl">LOCATION</span>
+                        <div class="val multi-val">
+                            <span id="res_continent">---</span> <span class="arr">›</span>
+                            <span id="res_country">---</span> <span class="arr">›</span>
+                            <span id="res_region">---</span> 
+                            </div>
+                    </div>
+
+                    <div class="res-row">
+                        <span class="lbl">POSTAL CODE</span>
+                        <span class="val" id="res_postal">---</span>
+                    </div>
+
+                    <div class="res-row net-row">
+                        <div class="net-item">
+                            <span class="lbl">ORG</span>
+                            <span class="val small" id="res_org">---</span>
+                        </div>
+                        <div class="net-item">
+                            <span class="lbl">ISP</span>
+                            <span class="val small" id="res_isp">---</span>
+                        </div>
+                        <div class="net-item">
+                            <span class="lbl">DOMAIN</span>
+                            <span class="val small" id="res_domain">---</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="scanEmptyState" class="empty-state-box">
+                    <div style="font-size: 40px; opacity: 0.5;">📡</div>
+                    <div style="margin-top:10px;">Ready to Scan...</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="mapContainer" class="map-container" style="display:none;">
+            <iframe id="ipMapFrame" class="map-frame" src=""></iframe>
+        </div>
+        
+    </div>
+
+    <div id="subTab" class="tab-content" style="display: none;">
+        <div class="panel">
+            <h2 style="margin:0; font-size: 1.2em;">🔍 Subdomain Enumeration</h2>
+            <p style="color:#777; font-size:11px; margin-bottom:15px;">Powered by Certificate Transparency Logs (crt.sh)</p>
+            
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="subInput" placeholder="example.com">
+                <button id="btnSubScan" class="btn-gen" style="width: 150px; margin:0;" onclick="scanSubdomains()">SCAN 🚀</button>
+            </div>
+
+            <div class="res-card" style="height: auto; min-height: 400px; margin-top: 20px; border:none; background:transparent; box-shadow:none; padding:0;">
+                <div class="res-header" style="color: var(--primary); background: rgba(0,0,0,0.3); border-radius: 8px 8px 0 0;">
+                    FOUND SUBDOMAINS
+                    <div style="display:flex; align-items:center;">
+                        <button class="header-action-btn btn-mini-save" style="display:inline-block; background:#444;" onclick="copySubdomains()">Copy List 📋</button>
+                        
+						<span id="subCount" class="count-badge" style="margin-left:5px;">0</span>
+                    </div>
+                </div>
+                <div id="subResultList" class="sub-list-container" style="margin-top:0; border-radius: 0 0 8px 8px; border-top:none;">
+                    <div style="text-align:center; padding:50px; color:#555;">
+                        <div style="font-size:40px; opacity:0.5;">🌐</div>
+                        Ready to scan target...
+                    </div>
+                </div>
+            </div>
+            
+            <div class="credits">Powered by <span>Hesham Taha</span></div>
+        </div>
+    </div>
+
+</div>
+
+<div id="binModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>💳 BIN Information</h3>
+            <span class="close-modal" onclick="closeBinModal()">&times;</span>
+        </div>
+        <div id="modalLoading" style="text-align:center; padding:20px; color:#aaa;">Searching... ⌛</div>
+        <div id="modalData" style="display:none;">
+            <div class="bin-row"><span>BIN</span> <span id="m_bin" style="color:var(--hit-color);">---</span></div>
+            <div class="bin-row"><span>Bank</span> <span id="m_bank">---</span></div>
+            <div class="bin-row"><span>Brand</span> <span id="m_brand">---</span></div>
+            <div class="bin-row"><span>Type</span> <span id="m_type">---</span></div>
+            <div class="bin-row"><span>Level</span> <span id="m_level">---</span></div>
+            <div class="bin-row"><span>Country</span> <span id="m_country">---</span></div>
+            <div class="bin-row"><span>Currency</span> <span id="m_currency">---</span></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-clear" onclick="closeBinModal()">Close ❌</button>
+            <button class="btn-check" onclick="saveBinDetails()">Save TXT 💾</button>
+        </div>
+    </div>
+</div>
+
+<div id="ibanInfoModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3 style="color:var(--primary);">🏦 Understanding IBAN Structure</h3>
+            <span class="close-modal" onclick="closeIbanInfoModal()">&times;</span>
+        </div>
+        
+        <div style="padding: 20px; font-size: 13px; line-height: 1.6; color: #ccc;">
+            <p style="margin-bottom: 15px; text-align: center; color: #aaa;">Example of a calculated German IBAN:</p>
+            <div style="background: rgba(0,0,0,0.3); padding: 15px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; text-align: center; font-family: 'Courier New', monospace; font-size: 22px; font-weight: bold; letter-spacing: 1px; margin-bottom: 20px;">
+                <span style="color: #9b59b6;">DE</span><span style="color: #f1c40f;">89</span><span style="color: #00ff88;">37040044</span><span style="color: #ddd;">0532013000</span>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <div style="width: 40px; text-align: center; font-weight: bold; color: #9b59b6; background: rgba(155, 89, 182, 0.1); padding: 2px 5px; border-radius: 4px; margin-right: 10px;">DE</div>
+                    <div><b style="color: #fff;">Country Code</b><div style="font-size: 11px; color: #888;">Identifies the country (Germany).</div></div>
+                </div>
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <div style="width: 40px; text-align: center; font-weight: bold; color: #f1c40f; background: rgba(241, 196, 15, 0.1); padding: 2px 5px; border-radius: 4px; margin-right: 10px;">89</div>
+                    <div><b style="color: #fff;">Check Digits (Calculated)</b><div style="font-size: 11px; color: #888;">We calculate this to make the IBAN valid.</div></div>
+                </div>
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <div style="width: 40px; text-align: center; font-weight: bold; color: #00ff88; background: rgba(0, 255, 136, 0.1); padding: 2px 5px; border-radius: 4px; margin-right: 10px;">370..</div>
+                    <div><b style="color: #fff;">Bank Code (BLZ)</b><div style="font-size: 11px; color: #888;">The specific bank ID you entered.</div></div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <div style="width: 40px; text-align: center; font-weight: bold; color: #ddd; background: rgba(255, 255, 255, 0.1); padding: 2px 5px; border-radius: 4px; margin-right: 10px;">053..</div>
+                    <div><b style="color: #fff;">Account Number</b><div style="font-size: 11px; color: #888;">Generated randomly by the tool.</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-clear" onclick="closeIbanInfoModal()">Close ❌</button>
+        </div>
+    </div>
+</div>
+
+<div id="ibanAnalyzerModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>🎨 IBAN Visual Analyzer</h3>
+            <span class="close-modal" onclick="closeIbanAnalyzerModal()">&times;</span>
+        </div>
+        <div style="padding: 20px;">
+            <p style="color:#aaa; font-size:12px; margin-bottom:10px;">Paste any IBAN to see a color-coded breakdown of its structure.</p>
+            <input type="text" id="analyzerInput" placeholder="Paste IBAN here (e.g. DE89...)" style="font-family:monospace; letter-spacing:1px; text-transform:uppercase; font-size:16px; text-align:center;" oninput="parseIbanVisual()">
+            <div id="analyzerOutput" class="visual-box" style="margin-top: 20px; min-height: 60px; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:5px;">
+                <span style="color:#555;">Waiting for input...</span>
+            </div>
+            <div class="visual-legend" style="margin-top: 20px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                <div class="v-part v-country">Country</div>
+                <div class="v-part v-check">Check</div>
+                <div class="v-part v-bank">Bank Code</div>
+                <div class="v-part v-acc">Account / BBAN</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-clear" onclick="closeIbanAnalyzerModal()">Close ❌</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="script.js"></script>
+<script src="identity.js"></script>
+<script src="iban.js"></script>
+<script src="ip_tools.js"></script>
+<script src="subdomain.js"></script>
+
+</body>
+</html>

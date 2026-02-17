@@ -1,0 +1,178 @@
+/* ================= IBAN TOOLS THEME (Flat & Interactive) ================= */
+
+/* 1. المتغيرات الخاصة بتبويب الايبان فقط */
+#ibanTab {
+    --primary: #9b59b6; /* لون أرجواني هادي */
+}
+
+/* 2. تخصيص العناوين */
+#ibanTab h2 {
+    color: var(--primary) !important;
+    text-shadow: none; 
+}
+
+/* 3. تنسيق زر التوليد (Generate) */
+#ibanTab .btn-gen {
+    background: var(--primary);
+    color: white;
+    box-shadow: none !important; /* بدون ظل */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.2s, transform 0.1s; /* نعومة الحركة */
+}
+
+#ibanTab .btn-gen:hover {
+    background: #8e44ad;
+    transform: none !important; /* نمنع القفز لأعلى عند الماوس */
+    box-shadow: none !important;
+}
+
+#ibanTab .btn-gen:active {
+    transform: scale(0.95) !important; /* ✅ تفعيل الانكماش عند الضغط */
+}
+
+/* 4. تنسيق زر الفحص (Check) */
+#ibanTab .btn-check {
+    background: #00ff88 !important; /* أخضر */
+    color: #000 !important;
+    border: none;
+    box-shadow: none !important;
+    transition: background 0.2s, transform 0.1s;
+}
+
+#ibanTab .btn-check:hover {
+    background: #00e676 !important;
+    transform: none !important; /* نمنع القفز لأعلى */
+    box-shadow: none !important;
+}
+
+#ibanTab .btn-check:active {
+    transform: scale(0.95) !important; /* ✅ تفعيل الانكماش عند الضغط */
+}
+
+/* 5. تنسيق حقول الإدخال */
+#ibanTab input:focus, 
+#ibanTab select:focus, 
+#ibanTab textarea:focus {
+    border-color: var(--primary);
+    box-shadow: none !important; 
+}
+
+/* 6. أيقونة القائمة المنسدلة */
+#ibanTab select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239b59b6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+/* 7. زرار البحث البرتقالي (BIC Lookup) */
+.btn-lookup-bic {
+    background: #e67e22; 
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: none !important;
+}
+
+.btn-lookup-bic:hover {
+    background: #d35400;
+    transform: none !important;
+}
+
+.btn-lookup-bic:active {
+    transform: scale(0.95) !important; /* ✅ تفعيل الانكماش عند الضغط */
+}
+
+/* 8. تنسيق الـ Visual Breakdown */
+.v-part {
+    display: inline-block;
+    padding: 2px 4px;
+    margin-right: 2px;
+    border-radius: 4px;
+    font-weight: bold;
+    color: #000;
+}
+.v-country { background: var(--primary); color: white; } 
+.v-check { background: #f1c40f; color: black; }        
+.v-bank { background: #00ff88; color: black; }         
+.v-acc { background: #ddd; color: black; }             
+
+/* 9. تمييز زر التبويب العلوي (IBAN Tab) - أرجواني + ظل */
+.tab-btn:nth-child(2):hover,
+.tab-btn:nth-child(2).active {
+    border-color: #9b59b6 !important;
+    color: #9b59b6 !important;
+    background: rgba(155, 89, 182, 0.1); 
+    /* الظل الأرجواني */
+    box-shadow: 0 5px 20px -5px rgba(155, 89, 182, 0.5) !important;
+}
+
+/* تنسيقات قسم الـ IBAN Calculator */
+.calc-section {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+/* حالة عدم النشاط */
+.disabled-section {
+    opacity: 0.4;
+    pointer-events: none; /* يمنع الضغط */
+    filter: grayscale(0.8);
+}
+
+.calc-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.help-link {
+    color: var(--primary);
+    font-size: 11px;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: bold;
+}
+.help-link:hover { color: #fff; }
+
+/* تحسين مظهر Optgroup في القائمة */
+optgroup {
+    background: #1a1a1b;
+    color: var(--hit-color);
+    font-style: normal;
+    font-weight: bold;
+}
+
+/* --- IBAN Analyzer Modal Styles --- */
+#analyzerOutput .v-part {
+    font-size: 18px; /* تكبير الخط داخل المودال ليكون واضحاً */
+    padding: 5px 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* تنسيق حقل الإدخال في المودال */
+#analyzerInput {
+    border: 1px solid var(--primary);
+    background: rgba(0,0,0,0.2);
+    color: #fff;
+}
+#analyzerInput:focus {
+    box-shadow: 0 0 10px rgba(155, 89, 182, 0.3) !important;
+}
+
+/* تصغير خط مفتاح الألوان في المودال */
+.visual-legend .v-part {
+    font-size: 14px !important; /* صغر الرقم ده زي ما تحب */
+    padding: 2px 6px;
+    margin: 1px;
+}
